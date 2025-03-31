@@ -2,7 +2,7 @@ from praisonaiagents import Agent, MCP
 import os
 
 # Use the API key from environment or set it directly
-brave_api_key = os.getenv("BRAVE_API_KEY") or "BSAbRwmwE-WV_7gKR1ZZIdE2Twa0l4w"
+brave_api_key = os.getenv("BRAVE_API_KEY")
 
 # Use a single string command with environment variables
 search_agent = Agent(
