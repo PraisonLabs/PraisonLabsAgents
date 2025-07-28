@@ -2,18 +2,20 @@ import os
 import time
 import json
 import logging
+import asyncio
+import uuid
+import base64
+import cv2
 from typing import Any, Dict, Optional, List
 from pydantic import BaseModel
 from rich.text import Text
 from rich.panel import Panel
 from rich.console import Console
+from enum import Enum
 from ..main import display_error, TaskOutput, error_logs, client
 from ..agent.agent import Agent
 from ..task.task import Task
 from ..process.process import Process, LoopItems
-import asyncio
-import uuid
-from enum import Enum
 
 # Task status constants
 class TaskStatus(Enum):
@@ -34,14 +36,11 @@ _agents_shared_apps = {}  # Dict of port -> FastAPI app
 
 def encode_file_to_base64(file_path: str) -> str:
     """Base64-encode a file."""
-    import base64
     with open(file_path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
 def process_video(video_path: str, seconds_per_frame=2):
     """Split video into frames (base64-encoded)."""
-    import cv2
-    import base64
     base64_frames = []
     video = cv2.VideoCapture(video_path)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
