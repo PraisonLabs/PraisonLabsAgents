@@ -2,10 +2,12 @@
 pydantic
 rich
 openai>=1.30.0
+mcp>=1.6.0
 posthog>=3.0.0
 
 # Memory dependencies
 chromadb>=0.5.23
+litellm>=1.72.0
 
 # Knowledge dependencies
 mem0ai>=0.1.0
@@ -15,6 +17,10 @@ chonkie>=1.0.2
 # Graph memory dependencies (optional)
 # Uncomment for graph memory support:
 # mem0ai[graph]>=0.1.0
+
+# API dependencies
+fastapi>=0.115.0
+uvicorn>=0.34.0
 
 # Development dependencies
 python-dotenv>=0.19.0
