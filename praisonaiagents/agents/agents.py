@@ -1034,10 +1034,11 @@ Context:
                 missing_module = str(e).split("No module named '")[-1].rstrip("'")
                 display_error(f"Missing dependency: {missing_module}. Required for launch() method with HTTP mode.")
                 logging.error(f"Missing dependency: {missing_module}. Required for launch() method with HTTP mode.")
-                print(f"\nTo add API capabilities, install the required dependencies:")
-                print(f"pip install {missing_module}")
-                print("\nOr install all API dependencies with:")
-                print("pip install 'praisonaiagents[api]'")
+                console = Console()
+                console.print(f"\n[yellow]To add API capabilities, install the required dependencies:[/yellow]")
+                console.print(f"[cyan]pip install {missing_module}[/cyan]")
+                console.print("\n[yellow]Or install all API dependencies with:[/yellow]")
+                console.print("[cyan]pip install 'praisonaiagents[api]'[/cyan]")
                 return None
             
             # Initialize port-specific collections if needed
@@ -1074,13 +1075,13 @@ Context:
             # Check if path is already registered for this port
             if path in _agents_registered_endpoints[port]:
                 logging.warning(f"Path '{path}' is already registered on port {port}. Please use a different path.")
-                print(f"⚠️ Warning: Path '{path}' is already registered on port {port}.")
+                console.print(f"[yellow]⚠️ Warning: Path '{path}' is already registered on port {port}.[/yellow]")
                 # Use a modified path to avoid conflicts
                 original_path = path
                 instance_id = str(uuid.uuid4())[:6]
                 path = f"{path}_{instance_id}"
                 logging.warning(f"Using '{path}' instead of '{original_path}'")
-                print(f"🔄 Using '{path}' instead")
+                console.print(f"[cyan]🔄 Using '{path}' instead[/cyan]")
             
             # Generate a unique ID for this agent group's endpoint
             endpoint_id = str(uuid.uuid4())
@@ -1155,9 +1156,9 @@ Context:
                         content={"error": f"Error processing query: {str(e)}"}
                     )
             
-            print(f"🚀 Multi-Agent HTTP API available at http://{host}:{port}{path}")
+            console.print(f"[green]🚀 Multi-Agent HTTP API available at http://{host}:{port}{path}[/green]")
             agent_names = ", ".join([agent.name for agent in self.agents])
-            print(f"📊 Available agents for this endpoint ({len(self.agents)}): {agent_names}")
+            console.print(f"[blue]📊 Available agents for this endpoint ({len(self.agents)}): {agent_names}[/blue]")
             
             # Start the server if it's not already running for this port
             if not _agents_server_started.get(port, False):
@@ -1167,13 +1168,13 @@ Context:
                 # Start the server in a separate thread
                 def run_server():
                     try:
-                        print(f"✅ FastAPI server started at http://{host}:{port}")
-                        print(f"📚 API documentation available at http://{host}:{port}/docs")
-                        print(f"🔌 Registered HTTP endpoints on port {port}: {', '.join(list(_agents_registered_endpoints[port].keys()))}")
+                        console.print(f"[green]✅ FastAPI server started at http://{host}:{port}[/green]")
+                        console.print(f"[blue]📚 API documentation available at http://{host}:{port}/docs[/blue]")
+                        console.print(f"[cyan]🔌 Registered HTTP endpoints on port {port}: {', '.join(list(_agents_registered_endpoints[port].keys()))}[/cyan]")
                         uvicorn.run(_agents_shared_apps[port], host=host, port=port, log_level="debug" if debug else "info")
                     except Exception as e:
                         logging.error(f"Error starting server: {str(e)}", exc_info=True)
-                        print(f"❌ Error starting server: {str(e)}")
+                        console.print(f"[red]❌ Error starting server: {str(e)}[/red]")
                 
                 # Run server in a background thread
                 server_thread = threading.Thread(target=run_server, daemon=True)
@@ -1184,7 +1185,7 @@ Context:
             else:
                 # If server is already running, wait a moment to make sure the endpoint is registered
                 time.sleep(0.1)
-                print(f"🔌 Registered HTTP endpoints on port {port}: {', '.join(list(_agents_registered_endpoints[port].keys()))}")
+                console.print(f"[cyan]🔌 Registered HTTP endpoints on port {port}: {', '.join(list(_agents_registered_endpoints[port].keys()))}[/cyan]")
             
             # Get the stack frame to check if this is the last launch() call in the script
             import inspect
@@ -1210,16 +1211,16 @@ Context:
                     # If this is the last launch call, block the main thread
                     if not has_more_launches:
                         try:
-                            print("\nAll agent groups registered for HTTP mode. Press Ctrl+C to stop the servers.")
+                            console.print("[green]\nAll agent groups registered for HTTP mode. Press Ctrl+C to stop the servers.[/green]")
                             while True:
                                 time.sleep(1)
                         except KeyboardInterrupt:
-                            print("\nServers stopped")
+                            console.print("[yellow]\nServers stopped[/yellow]")
                 except Exception as e:
                     # If something goes wrong with detection, block anyway to be safe
                     logging.error(f"Error in HTTP launch detection: {e}")
                     try:
-                        print("\nKeeping HTTP servers alive. Press Ctrl+C to stop.")
+                        console.print("[green]\nKeeping HTTP servers alive. Press Ctrl+C to stop.[/green]")
                         while True:
                             time.sleep(1)
                     except KeyboardInterrupt:
@@ -1249,9 +1250,9 @@ Context:
                 missing_module = str(e).split("No module named '")[-1].rstrip("'")
                 display_error(f"Missing dependency: {missing_module}. Required for launch() method with MCP mode.")
                 logging.error(f"Missing dependency: {missing_module}. Required for launch() method with MCP mode.")
-                print(f"\nTo add MCP capabilities, install the required dependencies:")
-                print(f"pip install {missing_module} mcp praison-mcp starlette uvicorn")
-                print("\nOr install all MCP dependencies with relevant packages.")
+                console.print(f"\n[yellow]To add MCP capabilities, install the required dependencies:[/yellow]")
+                console.print(f"[cyan]pip install {missing_module} mcp praison-mcp starlette uvicorn[/cyan]")
+                console.print("[yellow]\nOr install all MCP dependencies with relevant packages.[/yellow]")
                 return None
 
             mcp_instance = FastMCP("praisonai_workflow_mcp_server")
@@ -1318,21 +1319,21 @@ Context:
                 ],
             )
 
-            print(f"🚀 PraisonAIAgents MCP Workflow server starting on http://{host}:{port}")
-            print(f"📡 MCP SSE endpoint available at {sse_mcp_path}")
-            print(f"📢 MCP messages post to {messages_mcp_path_prefix}")
+            console.print(f"[green]🚀 PraisonAIAgents MCP Workflow server starting on http://{host}:{port}[/green]")
+            console.print(f"[blue]📡 MCP SSE endpoint available at {sse_mcp_path}[/blue]")
+            console.print(f"[blue]📢 MCP messages post to {messages_mcp_path_prefix}[/blue]")
             # Instead of trying to extract tool names, hardcode the known tool name
             mcp_tool_names = [actual_mcp_tool_name]  # Use the determined dynamic tool name
-            print(f"🛠️ Available MCP tools: {', '.join(mcp_tool_names)}")
+            console.print(f"[cyan]🛠️ Available MCP tools: {', '.join(mcp_tool_names)}[/cyan]")
             agent_names_in_workflow = ", ".join([a.name for a in self.agents])
-            print(f"🔄 Agents in MCP workflow: {agent_names_in_workflow}")
+            console.print(f"[cyan]🔄 Agents in MCP workflow: {agent_names_in_workflow}[/cyan]")
 
             def run_praison_mcp_server():
                 try:
                     uvicorn.run(starlette_mcp_app, host=host, port=port, log_level="debug" if debug else "info")
                 except Exception as e:
                     logging.error(f"Error starting PraisonAIAgents MCP server: {str(e)}", exc_info=True)
-                    print(f"❌ Error starting PraisonAIAgents MCP server: {str(e)}")
+                    console.print(f"[red]❌ Error starting PraisonAIAgents MCP server: {str(e)}[/red]")
 
             mcp_server_thread = threading.Thread(target=run_praison_mcp_server, daemon=True)
             mcp_server_thread.start()
@@ -1353,19 +1354,19 @@ Context:
                             break
                     if not has_more_launches:
                         try:
-                            print("\nPraisonAIAgents MCP server running. Press Ctrl+C to stop.")
+                            console.print("[green]\nPraisonAIAgents MCP server running. Press Ctrl+C to stop.[/green]")
                             while True:
                                 time.sleep(1)
                         except KeyboardInterrupt:
-                            print("\nPraisonAIAgents MCP Server stopped")
+                            console.print("[yellow]\nPraisonAIAgents MCP Server stopped[/yellow]")
                 except Exception as e:
                     logging.error(f"Error in PraisonAIAgents MCP launch detection: {e}")
                     try:
-                        print("\nKeeping PraisonAIAgents MCP server alive. Press Ctrl+C to stop.")
+                        console.print("[green]\nKeeping PraisonAIAgents MCP server alive. Press Ctrl+C to stop.[/green]")
                         while True:
                             time.sleep(1)
                     except KeyboardInterrupt:
-                        print("\nPraisonAIAgents MCP Server stopped")
+                        console.print("[yellow]\nPraisonAIAgents MCP Server stopped[/yellow]")
             return None
         else:
             display_error(f"Invalid protocol: {protocol}. Choose 'http' or 'mcp'.")
